@@ -21,7 +21,7 @@
 #include <cuda_runtime.h>
 using namespace std;
 
-#define N 8 //Number of data in the csv
+#define N 87395 //Number of data in the csv
 
 __global__ void getK(float *a,float *c )
 {
