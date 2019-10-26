@@ -61,10 +61,12 @@ int main(int argc, char** argv)
 	while(read>>row){
 		if(count!=0){
 			std::string delimiter = ",";
-			std::string token = row.substr(row.find(delimiter)+1);
-			double temp = ::atof(token.c_str());
-			float temperature = float(temp);
-			a1[count] = temperature;
+			if(count%2==0){
+				std::string token = row.substr(row.find(delimiter)+1);
+				double temp = ::atof(token.c_str());
+				float temperature = float(temp);
+				a1[count/2] = temperature;
+			}			
 		}
 	  	count++;
 	}
@@ -77,8 +79,26 @@ int main(int argc, char** argv)
 	}
 
 	for (int k=0;k<N;k++){
-		cout<<c1[k]<<"\n";
+		cout<<c1[k]<<"|"<<k<<"\n";
 	}
+
+	int medPerPeriod = 24000;
+	int sum = 0;
+	int period = 0;
+	for (int k=0;k<N;k++){
+		sum+=c1[k];
+		if(k%medPerPeriod==0&&k!=0){
+			period++;
+			double average = sum/medPerPeriod;
+			printf("Period: %d  Value of K: %f\n",period,average);
+			sum=0;
+		}
+	}
+
+	
+	
+	
+
 
 	cudaStreamDestroy(stream1);					//Destruir cudaStreamDestroy(stream1)
 	return 0;
