@@ -11,28 +11,23 @@
 */
 
 #include <iostream> //cout, cin, cerr
-#include <unistd.h>
-#include <cmath>
 #include <fstream> //file processing
 #include <cstdlib> //exit function
-#include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
-#include <cuda_runtime.h>
 using namespace std;
 
 #define N 87395 //Number of data in the csv
 
 __global__ void getK(float *a,float *c )
 {
-	float A = 156.15f;
+	float A = 1000000000.0f;
 	float e = 2.71828182846f;
-	float Ea = 23.515f;
+	float Ea = 45000.0f;
 	float R = 8.314f;
 	int myID = threadIdx.x + blockDim.x * blockIdx.x;				
 	if (myID < N)
 	{
-		c[myID] = (A*float(pow(e,(-Ea)/(R*a[myID]))));
+		c[myID] = (A*float(pow(e,(-Ea)/(R*(a[myID]+273.15f)))));
 	}
 }
 
@@ -77,23 +72,60 @@ int main(int argc, char** argv)
 		getK<<<(int)ceil(N/1024)+1,1024,0,stream1>>>(dev_a1,dev_c1);
 		cudaMemcpyAsync(c1,dev_c1,N*sizeof(int),cudaMemcpyDeviceToHost,stream1);
 	}
-
-	for (int k=0;k<N;k++){
-		cout<<c1[k]<<"|"<<k<<"\n";
+	
+	for (int k=0;k<N-1;k++){
+		cout<<"Dato: "<<k<<" | Value of K: "<<c1[k]<<"\n";
 	}
 
-	int medPerPeriod = 24000;
-	int sum = 0;
+	cout<<"\n\n\n------------------------------Values of K by period:------------------------------";
+	cout<<"\n\n          All values returned are based on the Cyclopentadiene Dimerization";
+	cout<<"\n\n\n                                H2 + I2 --> 2HI                              \n\n\n";
+
+	int medPerPeriod = 12000; //300 Data taken per second 12000 in 1 period
+	float sum = 0;
 	int period = 0;
-	for (int k=0;k<N;k++){
+	for (int k=0;k<N-1;k++){
 		sum+=c1[k];
 		if(k%medPerPeriod==0&&k!=0){
 			period++;
-			double average = sum/medPerPeriod;
-			printf("Period: %d  Value of K: %f\n",period,average);
+			int people = 0;
+			std::string hour = " ";
+			if(period==1){
+				hour = "07:00 - 07:50";
+				people = 38;
+			}
+			else if(period==2){
+				hour = "07:50 - 08:40";
+				people = 37;
+			}
+			else if(period==3){
+				hour = "08:40 - 09:30";
+				people = 36;
+			}
+			else if(period==4){
+				hour = "09:30 - 10:15";
+				people = 36;
+			}
+			else if(period==5){
+				hour = "10:15 - 10:40";
+				people = 3;
+			}
+			else if(period==6){
+				hour = "10:40 - 11:30";
+				people = 34;
+			}
+			else if(period==7){
+				hour = "11:30 - 12:15";
+				people = 35;
+			}
+			double average = double(sum)/double(medPerPeriod);
+			double velocity = (average*0.05*0.05);
+			cout<<"\tHour: "<<hour<<"\tPeople: "<<people<<"\tVelocity of reaction: "<< velocity<<"s\n";
 			sum=0;
 		}
 	}
+	cout<<"-----------------------------------------------------------------------------------\n\n\n";
+	
 
 	
 	
