@@ -55,12 +55,12 @@ int main(int argc, char** argv)
 		cerr<<"Fail to read data.csv"<<endl;
 	  	exit(EXIT_FAILURE);
 	}
-	int count = 0;
+	int count = 0;																		//Write all data
 	string row;
 	while(read>>row){
 		if(count!=0){
 			std::string delimiter = ",";
-			if(count%2==0){
+			if(count%2==0){																//Using just the temperature
 				std::string token = row.substr(row.find(delimiter)+1);
 				double temp = ::atof(token.c_str());
 				float temperature = float(temp);
@@ -74,21 +74,21 @@ int main(int argc, char** argv)
 	// interweave stream 1 and steam 2
 		if(i%2==0){
 			cudaMemcpyAsync(dev_a1,a1,N*sizeof(int),cudaMemcpyHostToDevice,stream1);			//Copy N*Size(int) bytes from a1 to dev_a1, host to device
-			getK<<<(int)ceil(N/1024)+1,1024,0,stream1>>>(dev_a1,dev_c1);
+			getK<<<(int)ceil(N/1024)+1,1024,0,stream1>>>(dev_a1,dev_c1);						//Using stream 1
 			cudaMemcpyAsync(c1,dev_c1,N*sizeof(int),cudaMemcpyDeviceToHost,stream1);
 		}
 		else{
 			cudaMemcpyAsync(dev_a1,a1,N*sizeof(int),cudaMemcpyHostToDevice,stream2);			//Copy N*Size(int) bytes from a1 to dev_a1, host to device
-			getK<<<(int)ceil(N/1024)+1,1024,0,stream1>>>(dev_a1,dev_c1);
+			getK<<<(int)ceil(N/1024)+1,1024,0,stream1>>>(dev_a1,dev_c1);						//Using streasm 2
 			cudaMemcpyAsync(c1,dev_c1,N*sizeof(int),cudaMemcpyDeviceToHost,stream2);
 		}
 	}
 	
-	for (int k=0;k<N-1;k++){
+	for (int k=0;k<N-1;k++){																	//Printing all data
 		cout<<"Dato: "<<k<<" | Value of K: "<<c1[k]<<"\n";
 	}
 
-	cout<<"\n\n\n------------------------------Values of K by period:------------------------------";
+	cout<<"\n\n\n------------------------------Values of K by period:------------------------------";				//Print data and write it in the file
 	cout<<"\n\n          All values returned are based on the Cyclopentadiene Dimerization";
 	cout<<"\n\n\n                                H2 + I2 --> 2HI                              \n\n\n";
 	std::ofstream myfile;
